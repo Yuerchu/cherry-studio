@@ -15,6 +15,7 @@ import ToolPermissionRequestCard from '../ToolPermissionRequestCard'
 import { BashOutputTool } from './BashOutputTool'
 import { BashTool } from './BashTool'
 import { EditTool } from './EditTool'
+import { EnterPlanModeTool } from './EnterPlanModeTool'
 import { ExitPlanModeTool } from './ExitPlanModeTool'
 import { getEffectiveStatus, StreamingContext, type ToolStatus, ToolStatusIndicator } from './GenericTools'
 import { GlobTool } from './GlobTool'
@@ -46,6 +47,7 @@ export const toolRenderers = {
   [AgentToolsType.Write]: WriteTool,
   [AgentToolsType.WebFetch]: WebFetchTool,
   [AgentToolsType.Edit]: EditTool,
+  [AgentToolsType.EnterPlanMode]: EnterPlanModeTool,
   [AgentToolsType.MultiEdit]: MultiEditTool,
   [AgentToolsType.BashOutput]: BashOutputTool,
   [AgentToolsType.NotebookEdit]: NotebookEditTool,

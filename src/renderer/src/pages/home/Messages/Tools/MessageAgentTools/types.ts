@@ -14,6 +14,7 @@ export enum AgentToolsType {
   Write = 'Write',
   WebFetch = 'WebFetch',
   Edit = 'Edit',
+  EnterPlanMode = 'EnterPlanMode',
   MultiEdit = 'MultiEdit',
   BashOutput = 'BashOutput',
   NotebookEdit = 'NotebookEdit',
@@ -319,6 +320,10 @@ export type NotebookEditToolInput = {
 }
 export type NotebookEditToolOutput = string
 
+// EnterPlanModeToolInput
+export type EnterPlanModeToolInput = Record<string, never>
+export type EnterPlanModeToolOutput = string
+
 // ExitPlanModeToolInput
 export type ExitPlanModeToolInput = {
   /**
@@ -421,6 +426,7 @@ export type ToolInput =
   | BashToolInput
   | BashOutputToolInput
   | EditToolInput
+  | EnterPlanModeToolInput
   | MultiEditToolInput
   | ReadToolInput
   | WriteToolInput
@@ -472,6 +478,7 @@ export interface ToolInputMap {
   [AgentToolsType.Write]: WriteToolInput
   [AgentToolsType.WebFetch]: WebFetchToolInput
   [AgentToolsType.Edit]: EditToolInput
+  [AgentToolsType.EnterPlanMode]: EnterPlanModeToolInput
   [AgentToolsType.MultiEdit]: MultiEditToolInput
   [AgentToolsType.BashOutput]: BashOutputToolInput
   [AgentToolsType.NotebookEdit]: NotebookEditToolInput
@@ -493,6 +500,7 @@ export interface ToolOutputMap {
   [AgentToolsType.Write]: WriteToolOutput
   [AgentToolsType.WebFetch]: WebFetchToolOutput
   [AgentToolsType.Edit]: EditToolOutput
+  [AgentToolsType.EnterPlanMode]: EnterPlanModeToolOutput
   [AgentToolsType.MultiEdit]: MultiEditToolOutput
   [AgentToolsType.BashOutput]: BashOutputToolOutput
   [AgentToolsType.NotebookEdit]: NotebookEditToolOutput

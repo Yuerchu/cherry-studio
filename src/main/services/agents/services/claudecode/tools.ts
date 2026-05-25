@@ -17,6 +17,20 @@ export const builtinTools: Tool[] = [
     type: 'builtin'
   },
   {
+    id: 'EnterPlanMode',
+    name: 'EnterPlanMode',
+    description: 'Enters plan mode for design exploration before implementation',
+    requirePermissions: false,
+    type: 'builtin'
+  },
+  {
+    id: 'ExitPlanMode',
+    name: 'ExitPlanMode',
+    description: 'Exits plan mode and presents the plan for user approval',
+    requirePermissions: false,
+    type: 'builtin'
+  },
+  {
     id: 'Glob',
     name: 'Glob',
     description: 'Finds files based on pattern matching',
