@@ -1,5 +1,4 @@
 import type { PermissionUpdate } from '@anthropic-ai/claude-agent-sdk'
-import type { TokenUsageData } from '@cherrystudio/analytics-client'
 import { electronAPI } from '@electron-toolkit/preload'
 import type { SpanEntity, TokenUsage } from '@mcp-trace/trace-core'
 import type { SpanContext } from '@opentelemetry/api'
@@ -832,9 +831,6 @@ const api = {
       message?: string
     }> => ipcRenderer.invoke(IpcChannel.OpenClaw_CheckUpdate),
     performUpdate: (): Promise<OperationResult> => ipcRenderer.invoke(IpcChannel.OpenClaw_PerformUpdate)
-  },
-  analytics: {
-    trackTokenUsage: (data: TokenUsageData) => ipcRenderer.invoke(IpcChannel.Analytics_TrackTokenUsage, data)
   }
 }
 
