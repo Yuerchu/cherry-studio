@@ -1324,7 +1324,7 @@ const migrateConfig = {
   },
   '90': (state: RootState) => {
     try {
-      state.settings.enableDataCollection = true
+      state.settings.enableDataCollection = false
       return state
     } catch (error) {
       return state

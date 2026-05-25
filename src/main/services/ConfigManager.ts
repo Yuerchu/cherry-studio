@@ -20,7 +20,6 @@ import type { LanguageVarious, Shortcut } from '@types'
 import { ThemeMode } from '@types'
 import { app } from 'electron'
 import Store from 'electron-store'
-import { v7 as uuid } from 'uuid'
 
 import { locales } from '../utils/locales'
 
@@ -37,7 +36,6 @@ export enum ConfigKeys {
   AutoUpdate = 'autoUpdate',
   TestPlan = 'testPlan',
   TestChannel = 'testChannel',
-  EnableDataCollection = 'enableDataCollection',
   SelectionAssistantEnabled = 'selectionAssistantEnabled',
   SelectionAssistantTriggerMode = 'selectionAssistantTriggerMode',
   SelectionAssistantFollowToolbar = 'selectionAssistantFollowToolbar',
@@ -48,7 +46,6 @@ export enum ConfigKeys {
   UseSystemTitleBar = 'useSystemTitleBar',
   Proxy = 'proxy',
   EnableDeveloperMode = 'enableDeveloperMode',
-  ClientId = 'clientId',
   GitBashPath = 'gitBashPath',
   GitBashPathSource = 'gitBashPathSource' // 'manual' | 'auto' | null
 }
@@ -185,14 +182,6 @@ export class ConfigManager {
     this.set(ConfigKeys.TestChannel, value)
   }
 
-  getEnableDataCollection(): boolean {
-    return this.get<boolean>(ConfigKeys.EnableDataCollection, true)
-  }
-
-  setEnableDataCollection(value: boolean) {
-    this.set(ConfigKeys.EnableDataCollection, value)
-  }
-
   // Selection Assistant: is enabled the selection assistant
   getSelectionAssistantEnabled(): boolean {
     return this.get<boolean>(ConfigKeys.SelectionAssistantEnabled, false)
@@ -270,17 +259,6 @@ export class ConfigManager {
 
   setEnableDeveloperMode(value: boolean) {
     this.set(ConfigKeys.EnableDeveloperMode, value)
-  }
-
-  getClientId(): string {
-    let clientId = this.get<string>(ConfigKeys.ClientId)
-
-    if (!clientId) {
-      clientId = uuid()
-      this.set(ConfigKeys.ClientId, clientId)
-    }
-
-    return clientId
   }
 
   set(key: string, value: unknown, isNotify: boolean = false) {

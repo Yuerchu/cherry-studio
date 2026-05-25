@@ -17,8 +17,7 @@ vi.mock('../ConfigManager', () => ({
     getLanguage: vi.fn(),
     getAutoUpdate: vi.fn(() => false),
     getTestPlan: vi.fn(() => false),
-    getTestChannel: vi.fn(),
-    getClientId: vi.fn(() => 'test-client-id')
+    getTestChannel: vi.fn()
   }
 }))
 

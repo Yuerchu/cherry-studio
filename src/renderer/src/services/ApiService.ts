@@ -17,7 +17,6 @@ import { type Chunk, ChunkType } from '@renderer/types/chunk'
 import type { Message, ResponseError } from '@renderer/types/newMessage'
 import { removeSpecialCharactersForTopicName, uuid } from '@renderer/utils'
 import { abortCompletion, readyToAbort } from '@renderer/utils/abortController'
-import { trackTokenUsage } from '@renderer/utils/analytics'
 import { isToolUseModeFunction } from '@renderer/utils/assistant'
 import { isPromptToolUse, isSupportedToolUse } from '@renderer/utils/assistant'
 import { getErrorMessage, isAbortError } from '@renderer/utils/error'
@@ -290,7 +289,6 @@ export async function fetchChatCompletion({
   const originalOnChunk = middlewareConfig.onChunk
   middlewareConfig.onChunk = (chunk: Chunk) => {
     if (chunk.type === ChunkType.BLOCK_COMPLETE) {
-      trackTokenUsage({ usage: chunk.response?.usage, model: assistant?.model, source: 'chat' })
     }
     originalOnChunk?.(chunk)
   }
@@ -539,14 +537,12 @@ export async function fetchMessagesSummary({
       await appendTrace({ topicId, traceId: messageWithTrace.traceId, model })
     }
 
-    const { getText, usage } = await AI.completions(model.id, llmMessages, {
+    const { getText } = await AI.completions(model.id, llmMessages, {
       ...middlewareConfig,
       assistant: summaryAssistant,
       topicId,
       callType: 'summary'
     })
-
-    trackTokenUsage({ usage, model })
 
     const text = getText()
     const result = removeSpecialCharactersForTopicName(text)
@@ -615,13 +611,11 @@ export async function fetchNoteSummary({ content, assistant }: { content: string
   }
 
   try {
-    const { getText, usage } = await AI.completions(model.id, llmMessages, {
+    const { getText } = await AI.completions(model.id, llmMessages, {
       ...middlewareConfig,
       assistant: summaryAssistant,
       callType: 'summary'
     })
-
-    trackTokenUsage({ usage, model })
 
     const text = getText()
     return removeSpecialCharactersForTopicName(text) || null
@@ -715,8 +709,6 @@ export async function fetchGenerate({
         callType: 'generate'
       }
     )
-
-    trackTokenUsage({ usage: result.usage, model })
 
     return result.getText() || ''
   } catch (error: any) {
