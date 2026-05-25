@@ -2,7 +2,7 @@ import { loggerService } from '@logger'
 import { isWin } from '@main/constant'
 import { getIpCountry } from '@main/utils/ipService'
 import { generateUserAgent } from '@main/utils/systemInfo'
-import { APP_NAME, FeedUrl, UpdateConfigUrl, UpdateMirror, UpgradeChannel } from '@shared/config/constant'
+import { FeedUrl, UpdateConfigUrl, UpdateMirror, UpgradeChannel } from '@shared/config/constant'
 import { IpcChannel } from '@shared/IpcChannel'
 import type { UpdateInfo } from 'builder-util-runtime'
 import { CancellationToken } from 'builder-util-runtime'
@@ -12,7 +12,6 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import semver from 'semver'
 
-import { analyticsService } from './AnalyticsService'
 import { configManager } from './ConfigManager'
 import { windowService } from './WindowService'
 
@@ -22,10 +21,7 @@ function getCommonHeaders() {
   return {
     'User-Agent': generateUserAgent(),
     'Cache-Control': 'no-cache',
-    'Client-Id': configManager.getClientId(),
-    'App-Name': APP_NAME,
-    'App-Version': `v${app.getVersion()}`,
-    OS: process.platform
+    'App-Version': `v${app.getVersion()}`
   }
 }
 
@@ -289,8 +285,6 @@ export default class AppUpdater {
   }
 
   public async checkForUpdates() {
-    void analyticsService.trackAppUpdate()
-
     if (isWin && 'PORTABLE_EXECUTABLE_DIR' in process.env) {
       return {
         currentVersion: app.getVersion(),

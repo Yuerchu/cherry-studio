@@ -34,16 +34,7 @@ const logger = loggerService.withContext('useAppInit')
 export function useAppInit() {
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
-  const {
-    proxyUrl,
-    proxyBypassRules,
-    language,
-    windowStyle,
-    autoCheckUpdate,
-    proxyMode,
-    customCss,
-    enableDataCollection
-  } = useSettings()
+  const { proxyUrl, proxyBypassRules, language, windowStyle, autoCheckUpdate, proxyMode, customCss } = useSettings()
   const { isLeftNavbar } = useNavbarPosition()
   const { minappShow } = useRuntime()
   const { setDefaultModel, setQuickModel, setTranslateModel } = useDefaultModel()
@@ -263,10 +254,6 @@ export function useAppInit() {
 
     return () => removeListeners.forEach((removeListener) => removeListener())
   }, [dispatch, t])
-
-  useEffect(() => {
-    // TODO: init data collection
-  }, [enableDataCollection])
 
   // Update memory service configuration when it changes
   useEffect(() => {
