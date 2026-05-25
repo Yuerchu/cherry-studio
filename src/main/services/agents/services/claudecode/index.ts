@@ -59,6 +59,8 @@ import { channelService } from '../ChannelService'
 import { PromptBuilder } from '../cherryclaw/prompt'
 import { sessionService } from '../SessionService'
 import { buildNamespacedToolCallId } from './claude-stream-state'
+import type { OpenAIBridgeHandle } from './openai-bridge'
+import { startOpenAIBridge } from './openai-bridge'
 import { promptForToolApproval } from './tool-permissions'
 import { ClaudeStreamState, transformSDKMessageToStreamParts } from './transform'
 import { with1mContextSuffix } from './utils'
@@ -162,15 +164,16 @@ class ClaudeCodeService implements AgentServiceInterface {
     const isAzureOpenAI = provider.type === 'azure-openai'
     const isAnthropicType = provider.type === 'anthropic'
     const hasAnthropicHost = provider.anthropicApiHost?.trim()
+    const isOpenAIType = provider.type === 'openai' || provider.type === 'openai-response'
 
-    if (!isAnthropicType && !isAzureOpenAI && !hasAnthropicHost) {
+    if (!isAnthropicType && !isAzureOpenAI && !hasAnthropicHost && !isOpenAIType) {
       logger.error('Anthropic provider configuration is missing', {
         modelInfo
       })
 
       aiStream.emit('data', {
         type: 'error',
-        error: new Error(`Invalid provider type '${provider.type}'. Expected 'anthropic' provider type.`)
+        error: new Error(`Invalid provider type '${provider.type}'. Expected 'anthropic' or 'openai' provider type.`)
       })
       return aiStream
     }
@@ -203,18 +206,33 @@ class ClaudeCodeService implements AgentServiceInterface {
     const sdkModelId = with1mContextSuffix(modelInfo.modelId, provider.anthropicApiHost)
     const customHeaders = getAnthropicCustomHeaders(provider.extra_headers)
 
+    // Start OpenAI bridge if provider is OpenAI-compatible
+    let openAIBridge: OpenAIBridgeHandle | null = null
+    if (isOpenAIType) {
+      try {
+        openAIBridge = await startOpenAIBridge({
+          apiKey: provider.apiKey || provider.id,
+          baseURL: provider.apiHost,
+          model: modelInfo.modelId || session.model
+        })
+        logger.info('OpenAI bridge started for session', { port: openAIBridge.port, sessionId: session.id })
+      } catch (error) {
+        aiStream.emit('data', {
+          type: 'error',
+          error: new Error(`Failed to start OpenAI bridge: ${error instanceof Error ? error.message : String(error)}`)
+        })
+        return aiStream
+      }
+    }
+
     const env = {
       ...loginShellEnv,
       ...getProxyEnvironment(process.env),
       // prevent claude agent sdk using bedrock api
       CLAUDE_CODE_USE_BEDROCK: '0',
-      // TODO: fix the proxy api server
-      // ANTHROPIC_API_KEY: apiConfig.apiKey,
-      // ANTHROPIC_AUTH_TOKEN: apiConfig.apiKey,
-      // ANTHROPIC_BASE_URL: `http://${apiConfig.host}:${apiConfig.port}/${modelInfo.provider.id}`,
-      ANTHROPIC_API_KEY: provider.apiKey,
-      ANTHROPIC_AUTH_TOKEN: provider.apiKey,
-      ANTHROPIC_BASE_URL: anthropicBaseUrl,
+      ANTHROPIC_API_KEY: openAIBridge ? 'bridge-passthrough' : provider.apiKey,
+      ANTHROPIC_AUTH_TOKEN: openAIBridge ? 'bridge-passthrough' : provider.apiKey,
+      ANTHROPIC_BASE_URL: openAIBridge ? `http://127.0.0.1:${openAIBridge.port}` : anthropicBaseUrl,
       ANTHROPIC_CUSTOM_HEADERS: customHeaders,
       ANTHROPIC_MODEL: sdkModelId,
       ANTHROPIC_DEFAULT_OPUS_MODEL: sdkModelId,
@@ -702,15 +720,19 @@ class ClaudeCodeService implements AgentServiceInterface {
         errorChunks,
         session.agent_id,
         session.id
-      ).catch((error) => {
-        logger.error('Unhandled Claude Code stream error', {
-          error: error instanceof Error ? { name: error.name, message: error.message } : String(error)
+      )
+        .catch((error) => {
+          logger.error('Unhandled Claude Code stream error', {
+            error: error instanceof Error ? { name: error.name, message: error.message } : String(error)
+          })
+          aiStream.emit('data', {
+            type: 'error',
+            error: error instanceof Error ? error : new Error(String(error))
+          })
         })
-        aiStream.emit('data', {
-          type: 'error',
-          error: error instanceof Error ? error : new Error(String(error))
+        .finally(() => {
+          openAIBridge?.close()
         })
-      })
     })
 
     return aiStream

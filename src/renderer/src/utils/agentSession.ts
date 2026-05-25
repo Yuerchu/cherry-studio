@@ -35,13 +35,6 @@ export const getChannelTypeIcon = (channelType: string | undefined): string | un
   return CHANNEL_TYPE_ICONS[channelType]
 }
 
-export const getModelFilterByAgentType = (type: AgentType): ApiModelsFilter => {
-  switch (type) {
-    case 'claude-code':
-      return {
-        providerType: 'anthropic'
-      }
-    default:
-      return {}
-  }
+export const getModelFilterByAgentType = (_type: AgentType): ApiModelsFilter => {
+  return {}
 }
